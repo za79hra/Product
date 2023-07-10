@@ -20,6 +20,9 @@ from bcrypt import hashpw, gensalt
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 import re
+import bcrypt
+
+
 User = get_user_model()
 
 class UserSerializer(serializers.ModelSerializer):
@@ -45,13 +48,18 @@ class UserSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Password must contain at least one of the following characters: %, $, &, ...')
         return value
 
+    # def create(self, validated_data):
+    #     user = User(username=validated_data['username'])
+    #     user.set_password(validated_data['password'])
+    #     user.save()
+    #     return user
+
     def create(self, validated_data):
-        user = User(username=validated_data['username'])
-        user.set_password(validated_data['password'])
-        user.save()
+        password = validated_data.pop('password')
+        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+        validated_data['password'] = hashed_password.decode('utf-8')
+        user = User.objects.create(**validated_data)
         return user
-
-
 
 
 

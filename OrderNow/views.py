@@ -12,7 +12,9 @@ class Register(APIView):
             return Response({"message":"User created successfully." , "data": serializer.data}, status=status.HTTP_200_OK)
             # return Response(serializer.data, status=status.HTTP_200_OK)
         if 'username' in serializer.errors:
-            return Response({"message": "this username has already been used."}, status=status.HTTP_403_FORBIDDEN)
+            errors = serializer.errors['username']
+            if 'unique' in errors:
+                return Response({"message": "this username has already been used."}, status=status.HTTP_403_FORBIDDEN)
 
         return Response({"message": "User creation failed.", "errors": serializer.errors}, status=400)
         # return Response(serializer.errors, status=400)
